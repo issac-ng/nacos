@@ -32,55 +32,60 @@ import org.springframework.stereotype.Service;
 @DependsOn("ProtocolManager")
 @Service("consistencyDelegate")
 public class DelegateConsistencyServiceImpl implements ConsistencyService {
-    
+
     private final PersistentConsistencyServiceDelegateImpl persistentConsistencyService;
-    
+
     private final EphemeralConsistencyService ephemeralConsistencyService;
-    
+
     public DelegateConsistencyServiceImpl(PersistentConsistencyServiceDelegateImpl persistentConsistencyService,
             EphemeralConsistencyService ephemeralConsistencyService) {
         this.persistentConsistencyService = persistentConsistencyService;
         this.ephemeralConsistencyService = ephemeralConsistencyService;
     }
-    
+
     @Override
     public void put(String key, Record value) throws NacosException {
         mapConsistencyService(key).put(key, value);
     }
-    
+
     @Override
     public void remove(String key) throws NacosException {
         mapConsistencyService(key).remove(key);
     }
-    
+
     @Override
     public Datum get(String key) throws NacosException {
         return mapConsistencyService(key).get(key);
     }
-    
+
     @Override
     public void listen(String key, RecordListener listener) throws NacosException {
-        
+
         // this special key is listened by both:
         if (KeyBuilder.SERVICE_META_KEY_PREFIX.equals(key)) {
-            persistentConsistencyService.listen(key, listener);
-            ephemeralConsistencyService.listen(key, listener);
+            persistentConsistencyService.listen(key, listener);//CP模型
+            ephemeralConsistencyService.listen(key, listener);//AP模型
             return;
         }
-        
+
         mapConsistencyService(key).listen(key, listener);
     }
-    
+
     @Override
     public void unListen(String key, RecordListener listener) throws NacosException {
         mapConsistencyService(key).unListen(key, listener);
     }
-    
+
     @Override
     public boolean isAvailable() {
         return ephemeralConsistencyService.isAvailable() && persistentConsistencyService.isAvailable();
     }
-    
+
+    /**
+     * 判断是走临时实例的逻辑还是持久实例的逻辑
+     * @param key
+     * @return
+     */
     private ConsistencyService mapConsistencyService(String key) {
         return KeyBuilder.matchEphemeralKey(key) ? ephemeralConsistencyService : persistentConsistencyService;
     }

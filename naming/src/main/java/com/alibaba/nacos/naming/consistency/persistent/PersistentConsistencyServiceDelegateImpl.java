@@ -35,15 +35,15 @@ import org.springframework.stereotype.Component;
  */
 @Component("persistentConsistencyServiceDelegate")
 public class PersistentConsistencyServiceDelegateImpl implements PersistentConsistencyService {
-    
+
     private final ClusterVersionJudgement versionJudgement;
-    
+
     private final RaftConsistencyServiceImpl oldPersistentConsistencyService;
-    
+
     private final BasePersistentServiceProcessor newPersistentConsistencyService;
-    
+
     private volatile boolean switchNewPersistentService = false;
-    
+
     public PersistentConsistencyServiceDelegateImpl(ClusterVersionJudgement versionJudgement,
             RaftConsistencyServiceImpl oldPersistentConsistencyService, ProtocolManager protocolManager)
             throws Exception {
@@ -52,47 +52,47 @@ public class PersistentConsistencyServiceDelegateImpl implements PersistentConsi
         this.newPersistentConsistencyService = createNewPersistentServiceProcessor(protocolManager, versionJudgement);
         init();
     }
-    
+
     private void init() {
         this.versionJudgement.registerObserver(isAllNewVersion -> switchNewPersistentService = isAllNewVersion, -1);
     }
-    
+
     @Override
     public void put(String key, Record value) throws NacosException {
         switchOne().put(key, value);
     }
-    
+
     @Override
     public void remove(String key) throws NacosException {
         switchOne().remove(key);
     }
-    
+
     @Override
     public Datum get(String key) throws NacosException {
         return switchOne().get(key);
     }
-    
+    //持久实例走的协议(CP模型的协议)
     @Override
     public void listen(String key, RecordListener listener) throws NacosException {
         oldPersistentConsistencyService.listen(key, listener);
         newPersistentConsistencyService.listen(key, listener);
     }
-    
+
     @Override
     public void unListen(String key, RecordListener listener) throws NacosException {
         newPersistentConsistencyService.unListen(key, listener);
         oldPersistentConsistencyService.unListen(key, listener);
     }
-    
+
     @Override
     public boolean isAvailable() {
         return switchOne().isAvailable();
     }
-    
+
     private PersistentConsistencyService switchOne() {
         return switchNewPersistentService ? newPersistentConsistencyService : oldPersistentConsistencyService;
     }
-    
+
     private BasePersistentServiceProcessor createNewPersistentServiceProcessor(ProtocolManager protocolManager,
             ClusterVersionJudgement versionJudgement) throws Exception {
         final BasePersistentServiceProcessor processor =

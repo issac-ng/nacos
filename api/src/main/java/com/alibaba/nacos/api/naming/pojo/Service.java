@@ -29,84 +29,85 @@ import java.util.Map;
  * <p>Typically we put some unique properties between instances to service level.
  *
  * @author nkorange
+ * 服务对象(服务端使用) namespace(命名空间)+groupName+name=等于一个唯一的服务
  */
 public class Service implements Serializable {
-    
+
     private static final long serialVersionUID = -3470985546826874460L;
-    
+
     /**
-     * service name.
+     * service name.服务名称
      */
     private String name;
-    
+
     /**
-     * protect threshold.
+     * protect threshold. 服务保护阈值
      */
     private float protectThreshold = 0.0F;
-    
+
     /**
-     * application name of this service.
+     * application name of this service.  应用的名称
      */
     private String appName;
-    
+
     /**
-     * Service group to classify services into different sets.
+     * Service group to classify services into different sets.  服务的分组
      */
     private String groupName;
-    
+    //服务的元数据
     private Map<String, String> metadata = new HashMap<String, String>();
-    
+
     public Service() {
     }
-    
+
     public Service(String name) {
         this.name = name;
     }
-    
+
     public String getName() {
         return name;
     }
-    
+
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public float getProtectThreshold() {
         return protectThreshold;
     }
-    
+
     public void setProtectThreshold(float protectThreshold) {
         this.protectThreshold = protectThreshold;
     }
-    
+
     public String getAppName() {
         return appName;
     }
-    
+
     public void setAppName(String appName) {
         this.appName = appName;
     }
-    
+
     public String getGroupName() {
         return groupName;
     }
-    
+
     public void setGroupName(String groupName) {
         this.groupName = groupName;
     }
-    
+
     public Map<String, String> getMetadata() {
         return metadata;
     }
-    
+
     public void setMetadata(Map<String, String> metadata) {
         this.metadata = metadata;
     }
-    
+
     public void addMetadata(String key, String value) {
         this.metadata.put(key, value);
     }
-    
+
     @Override
     public String toString() {
         return "Service{" + "name='" + name + '\'' + ", protectThreshold=" + protectThreshold + ", appName='" + appName

@@ -37,23 +37,25 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 1.4.1
  */
 public class InstancesChangeNotifier extends Subscriber<InstancesChangeEvent> {
-    
+
     private final Map<String, ConcurrentHashSet<EventListener>> listenerMap = new ConcurrentHashMap<String, ConcurrentHashSet<EventListener>>();
-    
+
     private final Object lock = new Object();
-    
+
     /**
      * register listener.
-     *
+     *注册监听器
      * @param serviceName combineServiceName, such as 'xxx@@xxx'
      * @param clusters    clusters, concat by ','. such as 'xxx,yyy'
      * @param listener    custom listener
      */
     public void registerListener(String serviceName, String clusters, EventListener listener) {
+        //获取服务key值
         String key = ServiceInfo.getKey(serviceName, clusters);
+        //获取该服务的监听器集合
         ConcurrentHashSet<EventListener> eventListeners = listenerMap.get(key);
         if (eventListeners == null) {
-            synchronized (lock) {
+            synchronized (lock) {//如果eventListeners 为空需要上锁因为，如果eventListeners为空就需要重新初始化一个，这是如果两个线程同时进来就会初始化两个eventListeners，这时单靠ConcurrentHashSet 就不能保证线程安全，所以需要单独为这种场景加一把锁
                 eventListeners = listenerMap.get(key);
                 if (eventListeners == null) {
                     eventListeners = new ConcurrentHashSet<EventListener>();
@@ -61,9 +63,10 @@ public class InstancesChangeNotifier extends Subscriber<InstancesChangeEvent> {
                 }
             }
         }
+        //将当前监听器添加到，该服务的监听器集合
         eventListeners.add(listener);
     }
-    
+
     /**
      * deregister listener.
      *
@@ -82,7 +85,7 @@ public class InstancesChangeNotifier extends Subscriber<InstancesChangeEvent> {
             listenerMap.remove(key);
         }
     }
-    
+
     /**
      * check serviceName,clusters is subscribed.
      *
@@ -95,7 +98,7 @@ public class InstancesChangeNotifier extends Subscriber<InstancesChangeEvent> {
         ConcurrentHashSet<EventListener> eventListeners = listenerMap.get(key);
         return CollectionUtils.isNotEmpty(eventListeners);
     }
-    
+
     public List<ServiceInfo> getSubscribeServices() {
         List<ServiceInfo> serviceInfos = new ArrayList<ServiceInfo>();
         for (String key : listenerMap.keySet()) {
@@ -103,7 +106,7 @@ public class InstancesChangeNotifier extends Subscriber<InstancesChangeEvent> {
         }
         return serviceInfos;
     }
-    
+
     @Override
     public void onEvent(InstancesChangeEvent event) {
         String key = ServiceInfo.getKey(event.getServiceName(), event.getClusters());
@@ -125,16 +128,16 @@ public class InstancesChangeNotifier extends Subscriber<InstancesChangeEvent> {
             listener.onEvent(namingEvent);
         }
     }
-    
+
     private com.alibaba.nacos.api.naming.listener.Event transferToNamingEvent(
             InstancesChangeEvent instancesChangeEvent) {
         return new NamingEvent(instancesChangeEvent.getServiceName(), instancesChangeEvent.getGroupName(),
                 instancesChangeEvent.getClusters(), instancesChangeEvent.getHosts());
     }
-    
+
     @Override
     public Class<? extends Event> subscribeType() {
         return InstancesChangeEvent.class;
     }
-    
+
 }
