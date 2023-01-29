@@ -73,7 +73,7 @@ public class BeatReactor implements Closeable {
 
     /**
      * Add beat information.
-     *  添加心跳 第一次是添加，如果dom2Beat已有就是删除
+     *  添加心跳
      * @param serviceName service name          服务的名称
      * @param beatInfo    beat information      服务的实例
      */
@@ -82,7 +82,7 @@ public class BeatReactor implements Closeable {
         String key = buildKey(serviceName, beatInfo.getIp(), beatInfo.getPort());//拼接serviceName#ip#port
         BeatInfo existBeat = null;
         //fix #1733
-        if ((existBeat = dom2Beat.remove(key)) != null) {//如果dom2Beat中已经存在该服务实例就删除
+        if ((existBeat = dom2Beat.remove(key)) != null) {
             existBeat.setStopped(true);
         }
         //将需要心跳的服务key及value BeatInfo 做缓存映射
