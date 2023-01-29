@@ -22,7 +22,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * Nacos starter.
+ * Nacos starter.1
  *
  * @author nacos
  */
@@ -30,7 +30,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @ServletComponentScan
 @EnableScheduling
 public class Nacos {
-    
+
     public static void main(String[] args) {
         SpringApplication.run(Nacos.class, args);
     }
