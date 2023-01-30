@@ -109,7 +109,7 @@ public class NamingProxy implements Closeable {
 
     private ScheduledExecutorService executorService;
 
-    private int maxRetry;
+    private int maxRetry;//重试次数
 
     public NamingProxy(String namespaceId, String endpoint, String serverList, Properties properties) {
         //安全认证：nacos client 请求 nacos server 首先需要登录认证产生会话

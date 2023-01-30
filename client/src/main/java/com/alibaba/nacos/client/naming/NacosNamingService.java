@@ -89,9 +89,11 @@ public class NacosNamingService implements NamingService {
         InitUtils.initWebRootContext(properties);
         initCacheDir();//把注册的实例保存到本地，如果server端挂了，因为server保存的服务节点是临时的所以服务端就会丢失了所有的服务节点，但这是客户端的cache本地缓存有，客户端也会有一个任务，可以把本地缓存起来的服务节点重新注册到刚刚重新启动好的server端中
         initLogName(properties);
-        //在nacos结构图中 nacos server 最外层有一个叫open api 其实就是rest 风格的api,然后客户端可以通过http请求，调用这些rest 风格的api,在nacos 2.X版本后就默认使用了grpc协议，性能也提高了一点，既然这样客户端就需要对服务端发起http请求，而发起请求的就是 serverProxy
+       /* 在nacos结构图中 nacos server 最外层有一个叫open api 其实就是rest 风格的api,然后客户端可以通过http请求，
+        调用这些rest 风格的api,在nacos 2.X版本后就默认使用了grpc协议，性能也提高了一点，既然这样客户端就需要对服务端发起http请求，而发起请求的就是 serverProxy*/
         this.serverProxy = new NamingProxy(this.namespace, this.endpoint, this.serverList, properties);
-        this.beatReactor = new BeatReactor(this.serverProxy, initClientBeatThreadCount(properties));//心跳反应器(通过serverProxy对服务端发送心跳)
+        //心跳反应器(通过serverProxy对服务端发送心跳)
+        this.beatReactor = new BeatReactor(this.serverProxy, initClientBeatThreadCount(properties));
         this.hostReactor = new HostReactor(this.serverProxy, beatReactor, this.cacheDir, isLoadCacheAtStart(properties),
                 isPushEmptyProtect(properties), initPollingThreadCount(properties));
     }
