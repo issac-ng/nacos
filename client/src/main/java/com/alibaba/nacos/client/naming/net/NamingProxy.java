@@ -242,7 +242,17 @@ public class NamingProxy implements Closeable {
         params.put("healthy", String.valueOf(instance.isHealthy()));
         params.put("ephemeral", String.valueOf(instance.isEphemeral()));
         params.put("metadata", JacksonUtils.toJson(instance.getMetadata()));
-
+        /**
+         * 向nacos server 进行注册
+         *   所谓的向 nacos server 注册，其实就是nacos server 提供了一个 REST API,
+         *   客户端通过调用这些API,将参数信息传递给它，nacos server 保存这些参数信息，这样就完成了注册
+         *
+         *   这里nacos server 提供的用以服务注册的API是
+         *   POST  /nacos/v1/ns/instance
+         *
+         *   下一个入口：nacos server 接收注册请求完成注册
+         *    在`naming`模块中找到：com.alibaba.nacos.naming.controllers.InstanceController#register(javax.servlet.http.HttpServletRequest)
+         */
         reqApi(UtilAndComs.nacosUrlInstance, params, HttpMethod.POST);
 
     }
